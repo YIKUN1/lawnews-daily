@@ -6,7 +6,16 @@ on:
     - cron: '0 0 * * *'
     # 晚报：每天 10:00 UTC (北京时间 18:00)
     - cron: '0 10 * * *'
-  workflow_dispatch:  # 支持手动触发
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: '报告类型'
+        required: true
+        default: 'morning'
+        type: choice
+        options:
+          - morning
+          - evening
 
 jobs:
   push-news:
@@ -27,7 +36,7 @@ jobs:
         pip install -r requirements.txt
     
     - name: Run morning news
-      if: github.event.schedule == '0 0 * * *'
+      if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *' || github.event.inputs.report_type == 'morning'
       env:
         PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
         PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
@@ -36,7 +45,7 @@ jobs:
         python main.py --now
     
     - name: Run evening news
-      if: github.event.schedule == '0 10 * * *'
+      if: github.event_name == 'schedule' && github.event.schedule == '0 10 * * *' || github.event.inputs.report_type == 'evening'
       env:
         PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
         PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
