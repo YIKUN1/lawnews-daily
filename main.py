@@ -285,6 +285,11 @@ def main():
         help='立即执行晚报'
     )
     parser.add_argument(
+        '--auto', '-a',
+        action='store_true',
+        help='自动模式：根据时间自动判断早报/晚报（上午发早报，下午发晚报）'
+    )
+    parser.add_argument(
         '--test', '-t',
         action='store_true',
         help='测试模式（不推送）'
@@ -320,6 +325,17 @@ def main():
             print(f"\n{i}. {news.get('title', '')}")
             print(f"   来源: {news.get('source', '')}")
             print(f"   摘要: {news.get('summary', '')[:50]}...")
+    
+    elif args.auto:
+        # 自动模式：根据时间判断早报/晚报
+        from datetime import datetime
+        hour = datetime.now().hour
+        if hour < 12:
+            report_type = "早报"
+        else:
+            report_type = "晚报"
+        result = collector.run(report_type)
+        print(f"\n{report_type}执行完成: {result.get('message', '')}")
     
     elif args.now or args.morning:
         # 立即执行早报
