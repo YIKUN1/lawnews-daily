@@ -1,0 +1,35 @@
+version: '1.0'
+name: lawnews-daily
+displayName: 法律日报推送
+triggers:
+  trigger: auto
+  push:
+    branches:
+      prefix:
+        - ''
+  schedule:
+    - cron: '* * 7 * * ? *'
+variables:
+  PUSHPLUS_TOKEN: edbf483335c9405da5438f9b2be26ae1
+  QWEN_API_KEY: sk-c71b8094159d4114b2a500a77a8a3bc5
+stages:
+  - name: stage-a88a92fb
+    displayName: 未命名
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@python
+        name: build_python
+        displayName: Python 构建
+        pythonVersion: '3.9'
+        commands:
+          - pip install -r requirements.txt && python main.py --now
+        artifacts:
+          - name: BUILD_ARTIFACT
+            path:
+              - ./
+        caches: []
+        notify: []
+        strategy:
+          retry: '0'
