@@ -59,7 +59,7 @@ class QwenSummarizer(BaseSummarizer):
         """使用通义千问生成摘要"""
         if not self.api_key:
             logger.warning("通义千问API密钥未配置")
-            return content[:100] + "..."
+            return ''
         
         try:
             import dashscope
@@ -79,14 +79,14 @@ class QwenSummarizer(BaseSummarizer):
                 return response.output.text.strip()
             else:
                 logger.error(f"通义千问调用失败: {response.message}")
-                return content[:100] + "..."
+                return ''
                 
         except ImportError:
             logger.warning("dashscope未安装，请运行: pip install dashscope")
-            return content[:100] + "..."
+            return ''
         except Exception as e:
             logger.error(f"通义千问调用异常: {e}")
-            return content[:100] + "..."
+            return ''
 
 
 class OpenAISummarizer(BaseSummarizer):
@@ -180,13 +180,14 @@ class SimpleSummarizer(BaseSummarizer):
     
     def summarize(self, title: str, content: str) -> str:
         """简单截取内容作为摘要"""
-        if content:
-            # 截取前100字
-            summary = content[:100]
-            if len(content) > 100:
-                summary += "..."
-            return summary
-        return title
+        # 如果没有有效内容或内容就是标题，返回空
+        if not content or content == title or content.startswith(title):
+            return ''
+        # 截取前100字
+        summary = content[:100]
+        if len(content) > 100:
+            summary += "..."
+        return summary
 
 
 class AISummarizer:

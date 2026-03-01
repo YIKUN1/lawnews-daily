@@ -7,9 +7,9 @@ pyyaml>=6.0
 # RSS解析
 feedparser>=6.0.0
 
-# AI服务（可选，按需安装）
+# AI服务
 # 通义千问
-# dashscope>=1.14.0
+dashscope>=1.14.0
 
 # OpenAI兼容（OpenAI/DeepSeek等）
 # openai>=1.0.0
