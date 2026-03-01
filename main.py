@@ -39,7 +39,8 @@ from crawlers import (
     WeiboCrawler,
     ZhihuCrawler,
     NewsPortalCrawler,
-    WeChatMPCrawler
+    WeChatMPCrawler,
+    RSSCrawler
 )
 
 logger = get_logger(__name__)
@@ -95,6 +96,10 @@ class LawNewsCollector:
         sources = crawler_config.get('sources', {})
         
         self.crawlers = []
+        
+        # RSS源（最可靠，可从国外访问）
+        if sources.get('rss', True):
+            self.crawlers.append(RSSCrawler(crawler_config))
         
         if sources.get('court', True):
             self.crawlers.append(CourtCrawler(crawler_config))

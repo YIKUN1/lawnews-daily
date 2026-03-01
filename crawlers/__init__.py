@@ -4,6 +4,7 @@ from .weibo import WeiboCrawler
 from .zhihu import ZhihuCrawler
 from .news_portal import NewsPortalCrawler
 from .wechat_mp import WeChatMPCrawler
+from .rss import RSSCrawler
 
 __all__ = [
     'BaseCrawler',
@@ -11,5 +12,6 @@ __all__ = [
     'WeiboCrawler',
     'ZhihuCrawler',
     'NewsPortalCrawler',
-    'WeChatMPCrawler'
+    'WeChatMPCrawler',
+    'RSSCrawler'
 ]
