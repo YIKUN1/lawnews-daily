@@ -55,9 +55,7 @@ class BasePusher(ABC):
         
         # 构建内容
         lines = [
-            f"⚖️ 法律日报 - {date_str} {report_type}",
-            "",
-            "━━━━━━━━━━━━━━━",
+            f"⚖️ 法律日报 · {date_str} {report_type}",
             ""
         ]
         
@@ -65,29 +63,23 @@ class BasePusher(ABC):
             title = news.get('title', '')
             summary = news.get('summary', '')
             source = news.get('source', '')
-            url = news.get('url', '')
             
             # 标题
-            lines.append(f"{i}️⃣ {title}")
+            lines.append(f"【{i}】{title}")
             
-            # 摘要（如果有且不是重复标题）
-            if summary and summary != title and not summary.startswith(title):
-                # 限制摘要长度
-                if len(summary) > 80:
-                    summary = summary[:80] + "..."
-                lines.append(f"   {summary}")
+            # 摘要（如果有有效内容）
+            if summary and len(summary) > 10:
+                lines.append(f"    {summary}")
             
-            # 来源和链接
-            if source:
-                lines.append(f"   📰 {source}")
+            # 来源（如果有）
+            if source and source not in ['Google法律新闻', 'RSS订阅', '百度法律热搜']:
+                lines.append(f"    📰 {source}")
             
             lines.append("")
         
         lines.extend([
             "━━━━━━━━━━━━━━━",
-            f"共收录 {len(news_list)} 条法律资讯",
-            "",
-            f"更新时间: {now.strftime('%H:%M')}",
+            f"📅 {now.strftime('%Y-%m-%d %H:%M')}",
             "",
             "信息整理：王德林律师",
             "个人名片：#小程序://滇才翼/8IOhdnFbszBqodl"

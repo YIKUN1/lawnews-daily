@@ -124,6 +124,14 @@ class RSSCrawler(BaseCrawler):
         if not url:
             return None
         
+        # 从标题中提取来源（格式：标题 - 来源）
+        real_source = source['name']
+        if ' - ' in title:
+            parts = title.rsplit(' - ', 1)
+            if len(parts) == 2 and len(parts[1]) < 20:  # 来源名通常较短
+                title = parts[0].strip()
+                real_source = parts[1].strip()
+        
         # 获取摘要
         summary = ''
         if 'summary' in entry:
@@ -133,7 +141,14 @@ class RSSCrawler(BaseCrawler):
         
         # 清理HTML标签
         summary = re.sub(r'<[^>]+>', '', summary)
-        summary = summary[:200] if len(summary) > 200 else summary
+        # 清理空白字符
+        summary = re.sub(r'\s+', ' ', summary).strip()
+        
+        # 如果摘要和标题相同或太短，置空
+        if summary == title or len(summary) < 10:
+            summary = ''
+        elif len(summary) > 150:
+            summary = summary[:150] + "..."
         
         # 获取发布时间
         published_at = datetime.now().isoformat()
@@ -146,8 +161,8 @@ class RSSCrawler(BaseCrawler):
         return {
             'title': title,
             'url': url,
-            'summary': summary or f"来源：{source['name']}",
-            'source': source['name'],
+            'summary': summary,
+            'source': real_source,  # 真实来源
             'source_type': self.source_type,
             'published_at': published_at,
             'hot_score': 30,
