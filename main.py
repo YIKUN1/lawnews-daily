@@ -157,10 +157,14 @@ class LawNewsCollector:
         if not news_list:
             return []
         
-        # 1. 关键词过滤
-        filtered = self.filter.filter_batch(news_list, min_matches=1)
+        # 1. 质量过滤（排除非新闻内容）
+        from processors.filter import QualityFilter
+        quality_filtered = QualityFilter.filter_batch(news_list)
         
-        # 2. URL去重（基于缓存）
+        # 2. 关键词过滤
+        filtered = self.filter.filter_batch(quality_filtered, min_matches=1)
+        
+        # 3. URL去重（基于缓存）
         url_filtered = []
         for news in filtered:
             url = news.get('url', '')
@@ -169,13 +173,13 @@ class LawNewsCollector:
                 continue
             url_filtered.append(news)
         
-        # 3. 内容去重
+        # 4. 内容去重
         deduped = self.dedup.dedup_batch(url_filtered)
         
-        # 4. 热度排序
+        # 5. 热度排序
         deduped.sort(key=lambda x: x.get('hot_score', 0), reverse=True)
         
-        # 5. 数量限制
+        # 6. 数量限制
         max_items = self.config.get('processor', {}).get('max_items', 10)
         result = deduped[:max_items]
         

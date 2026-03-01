@@ -41,7 +41,7 @@ class BasePusher(ABC):
     
     def format_news(self, news_list: List[Dict], report_type: str = "早报") -> str:
         """
-        格式化新闻为推送内容。
+        格式化新闻为推送内容（纯文本）。
         
         Args:
             news_list: 新闻列表
@@ -87,48 +87,53 @@ class BasePusher(ABC):
         
         return "\n".join(lines)
     
-    def format_markdown(self, news_list: List[Dict], report_type: str = "早报") -> str:
+    def format_html(self, news_list: List[Dict], report_type: str = "早报") -> str:
         """
-        格式化为Markdown格式。
+        格式化为HTML格式（支持链接点击）。
         
         Args:
             news_list: 新闻列表
             report_type: 报告类型
         
         Returns:
-            Markdown格式内容
+            HTML格式内容
         """
         now = datetime.now()
         date_str = now.strftime("%Y年%m月%d日")
         
         lines = [
-            f"## ⚖️ 法律日报 - {date_str} {report_type}",
-            "",
-            "---",
-            "",
-            "### 📌 热门法律事件",
-            ""
+            f"<h2>⚖️ 法律日报 · {date_str} {report_type}</h2>",
+            "<hr/>",
+            "<ol>"
         ]
         
-        for i, news in enumerate(news_list, 1):
+        for news in news_list:
             title = news.get('title', '')
             summary = news.get('summary', '')
             source = news.get('source', '')
             url = news.get('url', '')
             
-            lines.append(f"**{i}. [{title}]({url})**")
-            if summary:
-                if len(summary) > 100:
-                    summary = summary[:100] + "..."
-                lines.append(f"> {summary}")
-            if source:
-                lines.append(f"*来源: {source}*")
-            lines.append("")
+            # 标题带链接
+            if url:
+                lines.append(f"<li><a href=\"{url}\"><b>{title}</b></a></li>")
+            else:
+                lines.append(f"<li><b>{title}</b></li>")
+            
+            # 摘要
+            if summary and len(summary) > 10:
+                lines.append(f"<p style=\"color:#666;font-size:14px;\">{summary}</p>")
+            
+            # 来源
+            if source and source not in ['Google法律新闻', 'RSS订阅', '百度法律热搜']:
+                lines.append(f"<p style=\"color:#999;font-size:12px;\">📰 {source}</p>")
         
         lines.extend([
-            "---",
-            f"*共收录 {len(news_list)} 条法律资讯*",
-            f"*更新时间: {now.strftime('%H:%M')}*"
+            "</ol>",
+            "<hr/>",
+            f"<p style=\"color:#999;font-size:12px;\">📅 {now.strftime('%Y-%m-%d %H:%M')}</p>",
+            "<br/>",
+            "<p>信息整理：王德林律师</p>",
+            "<p>个人名片：#小程序://滇才翼/8IOhdnFbszBqodl</p>"
         ])
         
         return "\n".join(lines)
@@ -137,7 +142,7 @@ class BasePusher(ABC):
         self,
         news_list: List[Dict],
         report_type: str = "早报",
-        use_markdown: bool = False
+        use_html: bool = True
     ) -> Dict:
         """
         推送新闻。
@@ -145,7 +150,7 @@ class BasePusher(ABC):
         Args:
             news_list: 新闻列表
             report_type: 报告类型
-            use_markdown: 是否使用Markdown格式
+            use_html: 是否使用HTML格式（支持链接点击）
         
         Returns:
             推送结果
@@ -157,8 +162,8 @@ class BasePusher(ABC):
                 'message': '新闻列表为空'
             }
         
-        if use_markdown:
-            content = self.format_markdown(news_list, report_type)
+        if use_html:
+            content = self.format_html(news_list, report_type)
         else:
             content = self.format_news(news_list, report_type)
         
