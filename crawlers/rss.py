@@ -144,11 +144,9 @@ class RSSCrawler(BaseCrawler):
         # 清理空白字符
         summary = re.sub(r'\s+', ' ', summary).strip()
         
-        # 如果摘要和标题相同或太短，置空
-        if summary == title or len(summary) < 10:
+        # 如果摘要无效（与标题重复、太短、以标题开头），置空让AI生成
+        if summary == title or len(summary) < 10 or summary.startswith(title):
             summary = ''
-        elif len(summary) > 150:
-            summary = summary[:150] + "..."
         
         # 获取发布时间
         published_at = datetime.now().isoformat()

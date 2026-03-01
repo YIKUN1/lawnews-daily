@@ -240,11 +240,21 @@ class AISummarizer:
         title = news.get('title', '')
         content = news.get('summary', '')
         
-        # 如果已经有摘要且长度合适，跳过
-        if content and 50 <= len(content) <= 200:
+        # 检测无效摘要：空、太短、与标题重复
+        is_invalid = (
+            not content or 
+            len(content) < 20 or
+            content == title or 
+            content.startswith(title) or
+            title in content
+        )
+        
+        # 只有有效摘要才跳过AI生成
+        if not is_invalid and 50 <= len(content) <= 200:
             return news
         
-        summary = self.summarize(title, content)
+        # 调用AI生成摘要
+        summary = self.summarize(title, content or title)
         news['summary'] = summary
         
         return news
