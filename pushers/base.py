@@ -58,8 +58,6 @@ class BasePusher(ABC):
             f"⚖️ 法律日报 - {date_str} {report_type}",
             "",
             "━━━━━━━━━━━━━━━",
-            "",
-            "📌 热门法律事件",
             ""
         ]
         
@@ -69,14 +67,20 @@ class BasePusher(ABC):
             source = news.get('source', '')
             url = news.get('url', '')
             
+            # 标题
             lines.append(f"{i}️⃣ {title}")
-            if summary:
+            
+            # 摘要（如果有且不是重复标题）
+            if summary and summary != title and not summary.startswith(title):
                 # 限制摘要长度
-                if len(summary) > 100:
-                    summary = summary[:100] + "..."
+                if len(summary) > 80:
+                    summary = summary[:80] + "..."
                 lines.append(f"   {summary}")
+            
+            # 来源和链接
             if source:
-                lines.append(f"   来源: {source}")
+                lines.append(f"   📰 {source}")
+            
             lines.append("")
         
         lines.extend([
