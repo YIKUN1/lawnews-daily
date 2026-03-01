@@ -2,10 +2,10 @@ name: LawNews Daily
 
 on:
   schedule:
-    # 早报：每天 0:00 UTC (北京时间 8:00)
-    - cron: '0 0 * * *'
-    # 晚报：每天 10:00 UTC (北京时间 18:00)
-    - cron: '0 10 * * *'
+    # 早报：每天 23:00 UTC (北京时间 07:00)
+    - cron: '0 23 * * *'
+    # 晚报：每天 12:00 UTC (北京时间 20:00)
+    - cron: '0 12 * * *'
   workflow_dispatch:
     inputs:
       report_type:
@@ -36,7 +36,7 @@ jobs:
         pip install -r requirements.txt
     
     - name: Run morning news
-      if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *' || github.event.inputs.report_type == 'morning'
+      if: github.event_name == 'schedule' && github.event.schedule == '0 23 * * *' || github.event.inputs.report_type == 'morning'
       env:
         PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
         PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
@@ -45,7 +45,7 @@ jobs:
         python main.py --now
     
     - name: Run evening news
-      if: github.event_name == 'schedule' && github.event.schedule == '0 10 * * *' || github.event.inputs.report_type == 'evening'
+      if: github.event_name == 'schedule' && github.event.schedule == '0 12 * * *' || github.event.inputs.report_type == 'evening'
       env:
         PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
         PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
