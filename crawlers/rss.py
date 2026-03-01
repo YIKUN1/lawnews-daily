@@ -1,5 +1,6 @@
 import re
 import feedparser
+import requests
 from typing import Dict, List
 from datetime import datetime
 from urllib.parse import urljoin
@@ -14,30 +15,44 @@ logger = get_logger(__name__)
 
 
 class RSSCrawler(BaseCrawler):
-    """RSS源爬虫（可从国外访问）"""
+    """RSS源爬虫"""
     
     source_type = "rss"
     source_name = "RSS订阅"
     
-    # RSS源列表（可从国外访问）
+    # RSS源列表（国内服务器可用）
     RSS_SOURCES = [
-        # 百度法律热搜 - RSSHub
+        # 中国法院网 - 法律新闻
+        {
+            'name': '中国法院网',
+            'url': 'https://www.chinacourt.org/rss/index.xml',
+            'type': 'court'
+        },
+        # 法治日报
+        {
+            'name': '法治日报',
+            'url': 'https://www.legaldaily.com.cn/rss/legal_rss.xml',
+            'type': 'news'
+        },
+        # 最高人民法院
+        {
+            'name': '最高人民法院',
+            'url': 'https://www.court.gov.cn/rss/zxzt.xml',
+            'type': 'court'
+        },
+        # 百度热搜 - 法律（通过RSSHub国内镜像）
         {
             'name': '百度法律热搜',
-            'url': 'https://rsshub.app/baidu/hotword/法律',
-            'type': 'rsshub'
+            'url': 'https://rsshub.rssforever.com/baidu/hotword/法律',
+            'type': 'hot',
+            'timeout': 10
         },
-        # 热点新闻 - RSSHub
+        # 微博法律热搜（通过RSSHub国内镜像）
         {
-            'name': '热点新闻',
-            'url': 'https://rsshub.app/weibo/search/hot/法律',
-            'type': 'rsshub'
-        },
-        # Google News 法律
-        {
-            'name': 'Google法律新闻',
-            'url': 'https://news.google.com/rss/search?q=中国法律&hl=zh-CN&gl=CN&ceid=CN:zh-Hans',
-            'type': 'google'
+            'name': '微博法律热搜',
+            'url': 'https://rsshub.rssforever.com/weibo/search/hot/法律',
+            'type': 'hot',
+            'timeout': 10
         },
     ]
     
@@ -57,7 +72,7 @@ class RSSCrawler(BaseCrawler):
         
         for source in self.RSS_SOURCES:
             try:
-                results = self._fetch_rss(source, limit // len(self.RSS_SOURCES) + 3)
+                results = self._fetch_rss(source, limit // len(self.RSS_SOURCES) + 2)
                 all_results.extend(results)
                 logger.info(f"获取 {source['name']}: {len(results)} 条")
             except Exception as e:
@@ -82,7 +97,18 @@ class RSSCrawler(BaseCrawler):
             新闻列表
         """
         try:
-            feed = feedparser.parse(source['url'])
+            # 设置超时
+            timeout = source.get('timeout', 15)
+            
+            # 先用requests获取内容（可控制超时）
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            response = requests.get(source['url'], headers=headers, timeout=timeout)
+            response.encoding = response.apparent_encoding or 'utf-8'
+            
+            # 解析RSS
+            feed = feedparser.parse(response.text)
             
             if not feed.entries:
                 logger.warning(f"RSS源 {source['name']} 没有条目")
@@ -100,6 +126,9 @@ class RSSCrawler(BaseCrawler):
             
             return results
             
+        except requests.Timeout:
+            logger.warning(f"RSS源 {source['name']} 超时")
+            return []
         except Exception as e:
             logger.error(f"解析RSS失败 {source['name']}: {e}")
             return []
