@@ -87,7 +87,10 @@ class BasePusher(ABC):
             "━━━━━━━━━━━━━━━",
             f"共收录 {len(news_list)} 条法律资讯",
             "",
-            f"更新时间: {now.strftime('%H:%M')}"
+            f"更新时间: {now.strftime('%H:%M')}",
+            "",
+            "信息整理：王德林律师",
+            "个人名片：#小程序://滇才翼/8IOhdnFbszBqodl"
         ])
         
         return "\n".join(lines)
