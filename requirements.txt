@@ -1,0 +1,22 @@
+# LawNews Daily 依赖列表
+
+# 核心依赖
+requests>=2.28.0
+pyyaml>=6.0
+
+# AI服务（可选，按需安装）
+# 通义千问
+# dashscope>=1.14.0
+
+# OpenAI兼容（OpenAI/DeepSeek等）
+# openai>=1.0.0
+
+# 定时任务（推荐安装）
+apscheduler>=3.9.0
+
+# 微信机器人（可选）
+# wechaty>=0.8.0
+
+# 开发依赖
+# pytest>=7.0.0
+# black>=23.0.0

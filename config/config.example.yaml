@@ -1,0 +1,59 @@
+# LawNews Daily 配置文件模板
+# 复制此文件为 config.yaml 并填入实际值
+
+# 系统设置
+system:
+  log_level: INFO          # 日志级别: DEBUG/INFO/WARNING/ERROR
+  data_dir: ./data         # 数据存储目录
+  cache_expire_days: 7     # 缓存过期天数
+
+# 采集设置
+crawler:
+  timeout: 30              # 请求超时时间（秒）
+  max_retry: 3             # 最大重试次数
+  sources:
+    court: true            # 官方法律网站
+    weibo: true            # 微博热搜
+    zhihu: true            # 知乎热榜
+    news_portal: true      # 新闻门户
+    wechat_mp: false       # 微信公众号（需RSSHub支持）
+
+# 内容处理设置
+processor:
+  max_items: 10            # 每次推送最大条数
+  min_hot_score: 0         # 最低热度分数
+  dedup_threshold: 0.8     # 去重相似度阈值
+
+# AI摘要设置
+summarizer:
+  provider: qwen           # AI服务商: qwen/openai/wenxin/deepseek
+  api_key: YOUR_API_KEY    # API密钥（建议使用环境变量）
+  model: qwen-turbo        # 模型名称
+  max_tokens: 200          # 最大输出token数
+
+# 推送设置
+push:
+  method: pushplus         # 推送方式: pushplus/wechat_work/wechaty
+  
+  # PushPlus配置 (https://www.pushplus.plus)
+  pushplus:
+    token: YOUR_PUSHPLUS_TOKEN
+  
+  # 企业微信机器人配置
+  wechat_work:
+    webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY
+  
+  # Wechaty配置（可选）
+  wechaty:
+    puppet: wechaty-puppet-wechat
+    room_ids: []           # 群ID列表
+
+# 定时任务设置
+scheduler:
+  enabled: true            # 是否启用定时任务
+  morning:
+    hour: 8                # 早报时间-小时
+    minute: 0              # 早报时间-分钟
+  evening:
+    hour: 18               # 晚报时间-小时
+    minute: 0              # 晚报时间-分钟
