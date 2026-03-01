@@ -69,16 +69,28 @@ class QwenSummarizer(BaseSummarizer):
             
             prompt = self._build_prompt(title, content)
             
+            # 使用最新的API调用方式
             response = Generation.call(
                 model=self.model,
-                prompt=prompt,
-                max_tokens=self.max_tokens
+                messages=[
+                    {'role': 'user', 'content': prompt}
+                ],
+                max_tokens=self.max_tokens,
+                result_format='message'
             )
             
             if response.status_code == 200:
-                return response.output.text.strip()
+                # 新版API返回格式
+                output = response.output
+                if hasattr(output, 'choices') and output.choices:
+                    return output.choices[0].message.content.strip()
+                elif hasattr(output, 'text'):
+                    return output.text.strip()
+                else:
+                    logger.error(f"通义千问返回格式异常: {output}")
+                    return ''
             else:
-                logger.error(f"通义千问调用失败: {response.message}")
+                logger.error(f"通义千问调用失败: {response.code} - {response.message}")
                 return ''
                 
         except ImportError:
@@ -252,11 +264,18 @@ class AISummarizer:
         
         # 只有有效摘要才跳过AI生成
         if not is_invalid and 50 <= len(content) <= 200:
+            logger.debug(f"跳过AI摘要（已有有效摘要）: {title[:30]}...")
             return news
         
         # 调用AI生成摘要
+        logger.info(f"生成AI摘要: {title[:30]}...")
         summary = self.summarize(title, content or title)
-        news['summary'] = summary
+        
+        if summary:
+            news['summary'] = summary
+            logger.info(f"AI摘要生成成功: {summary[:50]}...")
+        else:
+            logger.warning(f"AI摘要生成失败，使用原标题")
         
         return news
     

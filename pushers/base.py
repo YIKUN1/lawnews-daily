@@ -142,7 +142,7 @@ class BasePusher(ABC):
         self,
         news_list: List[Dict],
         report_type: str = "早报",
-        use_html: bool = True
+        use_html: bool = False
     ) -> Dict:
         """
         推送新闻。
