@@ -1,0 +1,54 @@
+name: LawNews Daily
+displayName: '法律日报推送'
+
+triggers:
+  push:
+    branches:
+      - main
+  schedule:
+    # 早报：每天 07:00
+    - cron: '0 7 * * *'
+      displayName: '早报'
+    # 晚报：每天 20:00
+    - cron: '0 20 * * *'
+      displayName: '晚报'
+
+variables:
+  PYTHON_VERSION: '3.12'
+
+stages:
+  - stage:
+      name: build
+      displayName: '采集推送'
+      steps:
+        - step: python@3.12
+          name: install_deps
+          displayName: '安装依赖'
+          inputs:
+            script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+        
+        - step: python@3.12
+          name: run_morning
+          displayName: '早报推送'
+          condition: and(succeeded(), eq(variables['BUILD_REASON'], 'schedule'), eq(variables['SCHEDULE_DISPLAY_NAME'], '早报'))
+          inputs:
+            script: |
+              python main.py --now
+          env:
+            PUSHPLUS_TOKEN: $(PUSHPLUS_TOKEN)
+            PUSHPLUS_TOPIC: $(PUSHPLUS_TOPIC)
+            QWEN_API_KEY: $(QWEN_API_KEY)
+        
+        - step: python@3.12
+          name: run_evening
+          displayName: '晚报推送'
+          condition: and(succeeded(), eq(variables['BUILD_REASON'], 'schedule'), eq(variables['SCHEDULE_DISPLAY_NAME'], '晚报'))
+          inputs:
+            script: |
+              python main.py --evening
+          env:
+            PUSHPLUS_TOKEN: $(PUSHPLUS_TOKEN)
+            PUSHPLUS_TOPIC: $(PUSHPLUS_TOPIC)
+            QWEN_API_KEY: $(QWEN_API_KEY)
