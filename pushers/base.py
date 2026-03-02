@@ -79,7 +79,6 @@ class BasePusher(ABC):
         
         lines.extend([
             "━━━━━━━━━━━━━━━",
-            f"📅 {now.strftime('%Y-%m-%d %H:%M')}",
             "",
             "信息整理：王德林律师",
             "个人名片：#小程序://滇才翼/8IOhdnFbszBqodl"
@@ -130,7 +129,6 @@ class BasePusher(ABC):
         lines.extend([
             "</ol>",
             "<hr/>",
-            f"<p style=\"color:#999;font-size:12px;\">📅 {now.strftime('%Y-%m-%d %H:%M')}</p>",
             "<br/>",
             "<p>信息整理：王德林律师</p>",
             "<p>个人名片：#小程序://滇才翼/8IOhdnFbszBqodl</p>"
